@@ -33,9 +33,9 @@ Users:
 ```
 
 ## First endpoint: counts the transaction of a merchant.
-  Only add `transactions` in the transaction input field and click the `SUBMIT` button.
+  Only add `transactions` in the transaction input field and click the `Submit` button.
 	Result field will show counts of transactions of a merchant.
 	
 ## Second endpoint: percentage of happyness per user
-  Add both `transactions` and `users` in the respective fields and click the `SUBMIT`button.
+  Add both `transactions` and `users` in the respective fields and click the `Submit`button.
 	Result field will show  percentage of happyness per user.
