@@ -6,86 +6,28 @@
  * @flow
  */
 
-import React, { Component } from "react";
+import React, { Component } from 'react';
 import {
   StyleSheet,
-  Button,
   View,
   Text,
   TouchableOpacity,
-  TextInput
-} from "react-native";
+  TextInput,
+} from 'react-native';
 
-const transactions = [
-  {
-    id: 1,
-    merchant: "starbucks",
-    amount: 1.78,
-    date: "2018-01-01",
-    reflected: "GOOD",
-    user_id: 1
-  },
-  {
-    id: 2,
-    merchant: "starbucks",
-    amount: 5.76,
-    date: "2018-01-02",
-    reflected: "GOOD",
-    user_id: 1
-  },
-  {
-    id: 3,
-    merchant: "TimHortons",
-    amount: 8.76,
-    date: "2018-01-03",
-    reflected: "NEUTRAL",
-    user_id: 1
-  },
-  {
-    id: 4,
-    merchant: "TimHortons",
-    amount: 5.67,
-    date: "2018-01-04",
-    reflected: "BAD",
-    user_id: 1
-  },
-  {
-    id: 5,
-    merchant: "TimHortons",
-    amount: 11.76,
-    date: "2018-01-06",
-    reflected: "GOOD",
-    user_id: 1
-  },
-  {
-    id: 5,
-    merchant: "starbucks",
-    amount: 12.36,
-    date: "2018-01-07",
-    reflected: "GOOD",
-    user_id: 2
-  },
-  {
-    id: 5,
-    merchant: "TimHortons",
-    amount: 1.45,
-    date: "2018-01-08",
-    reflected: "GOOD",
-    user_id: 2
-  },
-];
+var usersData = [];
+var userTransactions = [];
 
-const users = [{ id: 1, name: "John" }, { id: 2, name: "Luke" }];
-var freq =[];
 
 export default class App extends Component {
   constructor() {
     super();
     this.state = {
-      finalResultArr: "Abhi",
-      //transactions: "",
-      //users: "",
-      viewSection: false
+      finalResultArr: [],
+      transactions:'',
+      users: '',
+      text: '',
+      viewSection: false,
     };
     
   }
@@ -100,9 +42,7 @@ export default class App extends Component {
     }
   }
 
-  // componentDidMount() {
-
-  // }
+  
 
   handleTransactions = text => {
     this.setState({ transactions: text });
@@ -111,26 +51,139 @@ export default class App extends Component {
     this.setState({ users: text });
   };
 
-  finalresult(test) {
-    
-    freq = transactions.reduce(function(result, value) {
-      if (!result[value.merchant]) {
+
+
+  findMerchantTransactionCount(userTransactions) {
+    var arrayToShow =[];
+    const merchantTransCount = userTransactions.reduce(function(result, value) {
+      if  (!result[value.merchant]) {
         result[value.merchant] = 1;
-      } else {
+    
+      } else  {
         result[value.merchant] = result[value.merchant] + 1;
+       
+
       }
       return result;
-    }, []);
-    console.log(JSON.stringify(freq));
+    }, {});
     
+    for (let [key, value] of Object.entries(merchantTransCount)) {
+       arrayToShow.push("{" + key + ":" + value + "}");
+      
+    }
     this.setState({
-      finalResultArr: freq,
-      viewSection: true
+      finalResultArr: "[" + arrayToShow + ']',
+      viewSection:true
+    });
+  }
 
+
+
+  findUserHappinessPercentage(userTransactions, usersData) {
+
+    //update the reflected value
+    const updated = userTransactions.map(item => {
+      var temp = Object.assign({}, item);
+      if (temp.reflected === 'GOOD') {
+        temp.reflected = 100;
+      } else if (temp.reflected === 'BAD') {
+        temp.reflected = -100;
+      } else {
+        temp.reflected = 0;
+      }
+      return temp;
     });
     
+
+    //calculate the frequency of reflected for each user
+    const freq = userTransactions.reduce(function(result, value) {
+      if (!result[value.user_id]) {
+        if (value.reflected === "NEUTRAL") result[value.user_id] = 0;
+        else result[value.user_id] = 1;
+      } else  {
+        if  (value.reflected === 'NEUTRAL')
+          result[value.user_id] = result[value.user_id] + 0;
+        else result[value.user_id] = result[value.user_id] + 1;
+      }
+
+    return result;
+    }, []);
+
     
-  };
+    //calculate the value of Happiness for each user
+    const reducedTrans = userTransactions.reduce(function(result, value) {
+      if (!result[value.user_id]) {
+
+        if (value.reflected === "GOOD") result[value.user_id] = 100;
+        else if (value.reflected === "BAD") result[value.user_id] = -100;
+        else result[value.user_id] = 0;
+
+      } 
+      else  {
+
+        if(value.reflected === 'GOOD')
+        result[value.user_id] = result[value.user_id]+100;
+
+        else if(value.reflected === 'BAD')
+          result[value.user_id] = result[value.user_id] - 100 ;
+
+        else result[value.user_id] = result[value.user_id] + 0 ;
+      }
+
+      return result;
+    }, []);
+    
+
+    // map the values of Happiness with respective user name
+    var sum = reducedTrans.map(function(num, idx) {
+      return num / freq[idx];
+    });
+
+    
+    var arrayToShow = [];
+    var resultArray = usersData.reduce(function(result, value) {
+    for (let i = 0; i < sum.length; i++) {
+        if (value.id === i) {
+          result[value.name] = sum[i] + '%';
+          arrayToShow.push("{" + value.name + ":" + result[value.name] + "}");
+
+  }
+      }
+      
+      return result;
+    }, []);
+
+    this.setState({
+      finalResultArr: "[" + arrayToShow + ']',
+      viewSection:true
+    });
+}
+
+
+  finalresult(test) {
+
+if(this.state.users == [] && this.state.transactions == [])
+ {
+  alert("Please Enter Endpoints")
+ }
+ else if(this.state.transactions != [] && this.state.users == [])
+ {
+     
+   userTransactions = JSON.parse(this.state.transactions);
+   this.findMerchantTransactionCount(userTransactions)
+ }
+ else
+ {
+   
+ 
+  userTransactions = JSON.parse(this.state.transactions);
+  usersData =  JSON.parse(this.state.users);
+   this.findUserHappinessPercentage(userTransactions,usersData);
+ }
+ 
+};
+
+
 
   render() {
     return (
@@ -169,25 +222,28 @@ export default class App extends Component {
 const styles = StyleSheet.create({
   container: {
     paddingTop: 23,
-    marginTop: 40,
+    marginTop: 40
   },
   input: {
     margin: 15,
     height: 40,
-    borderColor: "#7a42f4",
+    borderColor: '#7a42f4',
     borderWidth: 1,
+    alignItems:'center'
   },
   submitButton: {
-    backgroundColor: "#7a42f4",
+    backgroundColor: '#7a42f4',
     padding: 10,
     margin: 15,
-    height: 40
+    height: 40,
+    alignItems:'center'
   },
   submitButtonText: {
-    color: "white",
+    color: 'white',
+    
   },
   resultText: {
     margin: 15,
-    fontSize: 20
-  }
+    fontSize: 20,
+  },
 });
