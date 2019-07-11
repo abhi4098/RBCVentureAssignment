@@ -39,3 +39,8 @@ Users:
 ## Second endpoint: percentage of happyness per user
   Add both `transactions` and `users` in the respective fields and click the `Submit`button.
 	Result field will show  percentage of happyness per user.
+	
+## ScreenShots
+(https://user-images.githubusercontent.com/3746279/61013999-4236a000-a353-11e9-9a8d-d7adc381940f.PNG)
+(https://user-images.githubusercontent.com/3746279/61014079-afe2cc00-a353-11e9-97ba-e60d6fbdad89.PNG)
+
